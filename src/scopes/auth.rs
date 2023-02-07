@@ -1,16 +1,14 @@
 use actix_web::web::Json;
 use actix_web::{post, web, Scope};
-use chrono::{Duration, Utc};
-use jsonwebtoken::{encode, EncodingKey, Header};
 use pwhash::bcrypt;
 use serde::Deserialize;
 use validator::Validate;
 
 use crate::errors::{ApiError};
 use crate::response::{JWTResponse, respond_json};
+use crate::utils::create_token;
 use crate::validate::validate_body;
 use crate::{AppState};
-use crate::{extractors::jwt::Claims};
 use crate::models::users::{User};
 
 #[derive(Deserialize, Validate)]
@@ -58,15 +56,4 @@ async fn register(
     let insert_query = data.create(&app_state.db).await?;
     let token = create_token(insert_query.id, app_state.secret_key.clone());
     respond_json(JWTResponse { token })
-}
-
-fn create_token(user_id: i32, secret: String) -> String {
-    let exp = (Utc::now() + Duration::days(365)).timestamp() as usize;
-    let claims = Claims { id: user_id, exp };
-    encode(
-        &Header::default(),
-        &claims,
-        &EncodingKey::from_secret(secret.as_ref()),
-    )
-    .unwrap()
 }

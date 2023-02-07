@@ -4,6 +4,7 @@ mod models;
 mod response;
 mod scopes;
 mod validate;
+mod utils;
 
 use actix_cors::Cors;
 use actix_web::{
