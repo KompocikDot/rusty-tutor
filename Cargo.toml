@@ -1,0 +1,20 @@
+[package]
+name = "new_page"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.3.0"
+sqlx = { version = "0.6.1", features = ["runtime-actix-rustls", "postgres", "macros"] }
+dotenv = "0.15.0"
+serde = "1.0.152"
+serde_json = "1.0.91"
+validator = { version = "0.16.0", features = ["derive"] }
+jsonwebtoken = "8.2.0"
+chrono = "0.4.23"
+pwhash = "1.0.0"
+env_logger = "0.10.0"
+actix-cors = "0.6.4"
+derive_more = "0.99.17"

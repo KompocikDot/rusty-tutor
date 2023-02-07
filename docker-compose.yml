@@ -1,0 +1,9 @@
+version: '3.9'
+services:
+  postgres:
+    platform: linux/amd64
+    image: postgres:15.1-alpine
+    ports: 
+      - 5432:5432
+    env_file:
+      - .env
