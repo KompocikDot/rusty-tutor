@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgQueryResult, FromRow, Pool, Postgres};
+use sqlx::{FromRow};
 use validator::Validate;
+
+use crate::db::DbPool;
 
 #[derive(FromRow, Serialize, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -19,21 +21,23 @@ pub struct Opinion {
 impl Opinion {
     pub async fn create(
         &self,
-        db: &Pool<Postgres>,
+        db: &DbPool,
         creator_id: i32,
-        advert_id: i32,
-    ) -> sqlx::Result<PgQueryResult> {
-        sqlx::query!(
+    ) -> sqlx::Result<Opinion> {
+        sqlx::query_as!(
+            Opinion,
             "INSERT INTO opinions(
                 evaluated_person_id, opinion_creator_id, advert_id, content, rating
-            ) values($1, $2, $3, $4, $5)",
+            ) values($1, $2, $3, $4, $5) RETURNING *",
             self.evaluated_person_id,
             creator_id,
             self.advert_id,
             self.content,
             self.rating
         )
-        .execute(db)
+        .fetch_one(db)
         .await
     }
+
+    // pub async fn delete(db: &DbPool, user_id: i32, opinion_id: i32) -> Result<> 
 }

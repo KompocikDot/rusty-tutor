@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgQueryResult, FromRow, Pool, Postgres};
+use sqlx::{postgres::PgQueryResult, FromRow};
 use validator::Validate;
+
+use crate::db::DbPool;
 
 #[derive(FromRow)]
 pub struct UserCreate {
@@ -13,7 +15,7 @@ pub struct User {
     #[serde(skip_deserializing)]
     #[serde(skip_serializing)]
     pub id: i32,
-    #[validate(length(min = 3, message="username have to be at least 3 characters long"))]
+    #[validate(length(min = 3, message = "username have to be at least 3 characters long"))]
     pub username: String,
     #[serde(skip_serializing)]
     pub password: String,
@@ -22,7 +24,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn create(&self, db: &Pool<Postgres>) -> sqlx::Result<UserCreate> {
+    pub async fn create(&self, db: &DbPool) -> sqlx::Result<UserCreate> {
         let pwd = pwhash::bcrypt::hash(self.password.clone()).unwrap();
         sqlx::query_as!(
             UserCreate,
@@ -36,7 +38,7 @@ impl User {
             .await
     }
 
-    pub async fn get(db: &Pool<Postgres>, username: &String) -> sqlx::Result<User> {
+    pub async fn get(db: &DbPool, username: &str) -> sqlx::Result<User> {
         sqlx::query_as!(
             User,
             "SELECT * FROM users WHERE username = $1",
@@ -46,7 +48,7 @@ impl User {
         .await
     }
 
-    pub async fn update(&self, db: &Pool<Postgres>, user_id: i32) -> sqlx::Result<User> {
+    pub async fn update(&self, db: &DbPool, user_id: i32) -> sqlx::Result<User> {
         sqlx::query_as!(
             User,
             "UPDATE users SET username = $1, name = $2, surname = $3 WHERE id = $4 RETURNING *",
@@ -59,7 +61,7 @@ impl User {
         .await
     }
 
-    pub async fn delete(db: &Pool<Postgres>, user_id: i32) -> sqlx::Result<PgQueryResult> {
+    pub async fn delete(db: &DbPool, user_id: i32) -> sqlx::Result<PgQueryResult> {
         sqlx::query!("DELETE FROM users where id = $1", user_id)
             .execute(db)
             .await

@@ -1,10 +1,11 @@
+mod db;
 mod errors;
 mod extractors;
+mod handlers;
 mod models;
 mod response;
-mod scopes;
-mod validate;
 mod utils;
+mod validate;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -12,13 +13,13 @@ use actix_web::{
     web::{self},
     App, HttpServer,
 };
+use db::DbPool;
 use env_logger::Env;
-use scopes::{adverts::adverts_scope, auth::auth_scope, user::user_scope};
-use sqlx::postgres::{PgPool, PgPoolOptions};
+use handlers::{adverts::adverts_scope, auth::auth_scope, user::user_scope, opinions::opinions_scope};
 
 #[derive(Clone)]
 pub struct AppState {
-    db: PgPool,
+    db: DbPool,
     secret_key: String,
 }
 
@@ -29,11 +30,7 @@ async fn main() -> std::io::Result<()> {
     let secret_key = dotenv::var("SECRET").unwrap();
     let db_url = env!("DATABASE_URL");
 
-    let pool: PgPool = PgPoolOptions::new()
-        .max_connections(10)
-        .connect(db_url)
-        .await
-        .unwrap();
+    let pool: DbPool = db::create_pool(db_url).await;
 
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     let app_data = AppState {
@@ -54,6 +51,7 @@ async fn main() -> std::io::Result<()> {
             .service(auth_scope())
             .service(adverts_scope())
             .service(user_scope())
+            .service(opinions_scope())
     })
     .bind(("127.0.0.1", 8080))?
     .run()

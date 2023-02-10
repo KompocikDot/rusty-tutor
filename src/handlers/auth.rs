@@ -4,18 +4,26 @@ use pwhash::bcrypt;
 use serde::Deserialize;
 use validator::Validate;
 
-use crate::errors::{ApiError};
-use crate::response::{JWTResponse, respond_json};
+use crate::errors::ApiError;
+use crate::models::users::User;
+use crate::response::{respond_json, JWTResponse};
 use crate::utils::create_token;
 use crate::validate::validate_body;
-use crate::{AppState};
-use crate::models::users::{User};
+use crate::AppState;
 
 #[derive(Deserialize, Validate)]
 struct LoginBody {
-    #[validate(length(min = 3, max = 64, message="username have to be at least 3 characters long"))]
+    #[validate(length(
+        min = 3,
+        max = 64,
+        message = "password have to be between 9 and 64 characters"
+    ))]
     pub username: String,
-    #[validate(length(min = 9, max = 64))]
+    #[validate(length(
+        min = 9,
+        max = 64,
+        message = "password have to be between 9 and 64 characters"
+    ))]
     pub password: String,
 }
 
@@ -29,14 +37,12 @@ async fn login(
     data: web::Json<LoginBody>,
 ) -> Result<Json<JWTResponse>, ApiError> {
     validate_body(&data)?;
-    let user_obj  = User::get(&app_state.db, &data.username)
-        .await;
+    let user_obj = User::get(&app_state.db, &data.username).await;
 
     let user = match user_obj {
         Ok(user) => user,
         Err(_) => return Err(ApiError::Unauthorized("bad username or password".into())),
     };
-
 
     match bcrypt::verify(&data.password, &user.password) {
         true => {

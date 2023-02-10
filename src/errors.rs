@@ -1,8 +1,4 @@
-use actix_web::{
-    error::{ResponseError},
-    http::StatusCode,
-    HttpResponse,
-};
+use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
@@ -66,14 +62,13 @@ impl From<Vec<String>> for ErrorResponse {
     }
 }
 
-/// Convert DBErrors to ApiErrors
+/// Convert sqlx::error::Error to ApiErrors
 impl From<sqlx::error::Error> for ApiError {
     fn from(error: sqlx::error::Error) -> ApiError {
-        // Right now we just care about UniqueViolation from diesel
-        // But this would be helpful to easily map errors as our app grows
         match error {
             sqlx::Error::RowNotFound => ApiError::NotFound("could not find row".into()),
-            _ => ApiError::InternalServerError("".into())
+            // TODO: Change it later to not display stringified dberrors to the user
+            err => ApiError::InternalServerError(err.to_string()),
         }
     }
 }
