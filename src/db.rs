@@ -1,6 +1,6 @@
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{postgres::PgPoolOptions};
 
-pub type DbPool = Pool<Postgres>;
+use crate::types::DbPool;
 
 pub async fn create_pool(url: &str) -> DbPool {
     PgPoolOptions::new()

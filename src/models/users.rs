@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgQueryResult, FromRow};
 use validator::Validate;
 
-use crate::db::DbPool;
+use crate::types::DbPool;
+
+
 
 #[derive(FromRow)]
 pub struct UserCreate {
@@ -36,6 +38,16 @@ impl User {
         )
             .fetch_one(db)
             .await
+    }
+
+    pub async fn get_by_id(db: &DbPool, user_id: i32) -> sqlx::Result<User> {
+         sqlx::query_as!(
+            User,
+            "SELECT * FROM users WHERE id = $1",
+            user_id
+        )
+        .fetch_one(db)
+        .await
     }
 
     pub async fn get(db: &DbPool, username: &str) -> sqlx::Result<User> {

@@ -3,11 +3,9 @@ use serde::Serialize;
 
 use crate::errors::ApiError;
 
-pub type APIResponse<T> = Result<T, ApiError>;
-
 #[derive(Serialize)]
-pub struct Response<'m> {
-    pub message: &'m str,
+pub struct Response<T> {
+    pub data: T
 }
 
 #[derive(Serialize)]
@@ -15,10 +13,11 @@ pub struct JWTResponse {
     pub token: String,
 }
 
+
 pub fn respond_json<T>(data: T) -> Result<Json<T>, ApiError>
 where
     T: Serialize,
-{
+{ 
     Ok(Json(data))
 }
 

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use validator::Validate;
 
-use crate::{db::DbPool, errors::ApiError};
+use crate::{errors::ApiError, types::DbPool};
 
 #[derive(FromRow, Serialize, Deserialize, Validate, Clone, Debug)]
 #[serde(rename_all = "camelCase")]

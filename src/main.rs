@@ -6,6 +6,7 @@ mod models;
 mod response;
 mod utils;
 mod validate;
+pub mod types;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -13,9 +14,10 @@ use actix_web::{
     web::{self},
     App, HttpServer,
 };
-use db::DbPool;
+
 use env_logger::Env;
 use handlers::{adverts::adverts_scope, auth::auth_scope, user::user_scope, opinions::opinions_scope};
+use types::DbPool;
 
 #[derive(Clone)]
 pub struct AppState {

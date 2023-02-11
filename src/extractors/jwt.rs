@@ -1,7 +1,6 @@
 use std::future::{ready, Ready};
 
 use actix_web::dev::Payload;
-use actix_web::error::ErrorUnauthorized;
 use actix_web::http::header::HeaderValue;
 use actix_web::Error as ActixWebError;
 use actix_web::{web, FromRequest};
@@ -10,6 +9,7 @@ use jsonwebtoken::{decode, errors::Error as JwtError, DecodingKey, TokenData, Va
 use serde::{Deserialize, Serialize};
 
 use crate::AppState;
+use crate::errors::ApiError;
 pub struct JWTToken {
     pub id: i32,
 }
@@ -31,7 +31,7 @@ impl FromRequest for JWTToken {
 
         // No Header was sent
         if authorization_header_option.is_none() {
-            return ready(Err(ErrorUnauthorized("No authentication token sent!")));
+            return ready(Err(ApiError::Unauthorized("No authentication token sent!".to_string()).into()));
         }
         let authentication_token: String = authorization_header_option
             .unwrap()
@@ -39,9 +39,9 @@ impl FromRequest for JWTToken {
             .unwrap_or("")
             .to_string();
         if authentication_token.is_empty() {
-            return ready(Err(ErrorUnauthorized(
-                "Authentication token has foreign chars!",
-            )));
+            return ready(Err(ApiError::Unauthorized(
+                "Authentication token has foreign chars!".to_string(),
+            ).into()));
         }
         let secret: &String = &req.app_data::<web::Data<AppState>>().unwrap().secret_key;
 
@@ -55,7 +55,7 @@ impl FromRequest for JWTToken {
             Ok(token) => ready(Ok(JWTToken {
                 id: token.claims.id,
             })),
-            Err(_e) => ready(Err(ErrorUnauthorized("Invalid authentication token sent!"))),
+            Err(_e) => ready(Err(ApiError::Unauthorized("Invalid authentication token sent!".to_string()).into())),
         }
     }
 }

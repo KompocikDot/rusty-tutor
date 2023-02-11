@@ -4,7 +4,8 @@ use actix_web::{delete, get, patch, web, HttpResponse, Scope};
 
 use crate::errors::ApiError;
 use crate::models::users::User;
-use crate::response::{respond_json, APIResponse};
+use crate::response::{respond_json};
+use crate::types::APIResponse;
 use crate::validate::validate_body;
 use crate::{extractors::jwt::JWTToken, AppState};
 
@@ -24,12 +25,10 @@ async fn user_opinions(_app_state: web::Data<AppState>) -> HttpResponse {
 
 #[get("/profile")]
 async fn user_profile(
-    app_state: web::Data<AppState>,
+    state: web::Data<AppState>,
     jwt: JWTToken,
 ) -> APIResponse<Json<User>> {
-    let user = sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", jwt.id)
-        .fetch_one(&app_state.db)
-        .await?;
+    let user = User::get_by_id(&state.db, jwt.id).await?;
     respond_json(user)
 }
 
