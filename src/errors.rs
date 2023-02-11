@@ -1,6 +1,7 @@
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
+use validator::ValidationErrors;
 
 #[derive(Debug, Display, PartialEq)]
 #[allow(dead_code)]
@@ -11,14 +12,19 @@ pub enum ApiError {
     InternalServerError(String),
     NotFound(String),
     #[display(fmt = "")]
-    ValidationError(Vec<String>),
+    ValidationError(ValidationErrors),
     Unauthorized(String),
 }
 
 /// User-friendly error messages
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ErrorResponse {
     errors: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ValidationErrorResponse {
+    errors: ValidationErrors,
 }
 
 /// Automatically convert ApiErrors to external Response Errors
@@ -34,7 +40,7 @@ impl ResponseError for ApiError {
                 HttpResponse::NotFound().json(resp)
             }
             ApiError::ValidationError(errors) => {
-                let resp: ErrorResponse = errors.to_vec().into();
+                let resp: ValidationErrorResponse = errors.to_owned().into();
                 HttpResponse::UnprocessableEntity().json(resp)
             }
             ApiError::Unauthorized(error) => {
@@ -56,9 +62,9 @@ impl From<&String> for ErrorResponse {
 }
 
 /// Utility to make transforming a vector of strings into an ErrorResponse
-impl From<Vec<String>> for ErrorResponse {
-    fn from(errors: Vec<String>) -> Self {
-        ErrorResponse { errors }
+impl From<ValidationErrors> for ValidationErrorResponse {
+    fn from(errors: ValidationErrors) -> Self {
+        ValidationErrorResponse { errors }
     }
 }
 
@@ -66,7 +72,7 @@ impl From<Vec<String>> for ErrorResponse {
 impl From<sqlx::error::Error> for ApiError {
     fn from(error: sqlx::error::Error) -> ApiError {
         match error {
-            sqlx::Error::RowNotFound => ApiError::NotFound("could not find row".into()),
+            sqlx::Error::RowNotFound => ApiError::NotFound("Data not found in db".into()),
             // TODO: Change it later to not display stringified dberrors to the user
             err => ApiError::InternalServerError(err.to_string()),
         }

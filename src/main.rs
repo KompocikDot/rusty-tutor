@@ -4,9 +4,9 @@ mod extractors;
 mod handlers;
 mod models;
 mod response;
+pub mod types;
 mod utils;
 mod validate;
-pub mod types;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -16,7 +16,9 @@ use actix_web::{
 };
 
 use env_logger::Env;
-use handlers::{adverts::adverts_scope, auth::auth_scope, user::user_scope, opinions::opinions_scope};
+use handlers::{
+    adverts::adverts_scope, auth::auth_scope, opinions::opinions_scope, user::user_scope,
+};
 use types::DbPool;
 
 #[derive(Clone)]

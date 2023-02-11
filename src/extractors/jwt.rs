@@ -8,8 +8,8 @@ use jsonwebtoken::Algorithm;
 use jsonwebtoken::{decode, errors::Error as JwtError, DecodingKey, TokenData, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::AppState;
 use crate::errors::ApiError;
+use crate::AppState;
 pub struct JWTToken {
     pub id: i32,
 }
@@ -31,7 +31,10 @@ impl FromRequest for JWTToken {
 
         // No Header was sent
         if authorization_header_option.is_none() {
-            return ready(Err(ApiError::Unauthorized("No authentication token sent!".to_string()).into()));
+            return ready(Err(ApiError::Unauthorized(
+                "No authentication token sent!".to_string(),
+            )
+            .into()));
         }
         let authentication_token: String = authorization_header_option
             .unwrap()
@@ -41,7 +44,8 @@ impl FromRequest for JWTToken {
         if authentication_token.is_empty() {
             return ready(Err(ApiError::Unauthorized(
                 "Authentication token has foreign chars!".to_string(),
-            ).into()));
+            )
+            .into()));
         }
         let secret: &String = &req.app_data::<web::Data<AppState>>().unwrap().secret_key;
 
@@ -55,7 +59,10 @@ impl FromRequest for JWTToken {
             Ok(token) => ready(Ok(JWTToken {
                 id: token.claims.id,
             })),
-            Err(_e) => ready(Err(ApiError::Unauthorized("Invalid authentication token sent!".to_string()).into())),
+            Err(_e) => ready(Err(ApiError::Unauthorized(
+                "Invalid authentication token sent!".to_string(),
+            )
+            .into())),
         }
     }
 }

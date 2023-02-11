@@ -1,4 +1,4 @@
-use sqlx::{Postgres, Pool};
+use sqlx::{Pool, Postgres};
 
 use crate::errors::ApiError;
 
