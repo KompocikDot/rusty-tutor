@@ -11,11 +11,17 @@ pub struct Advert {
     pub id: i32,
     #[serde(skip_deserializing)]
     pub user_id: i32,
+    #[validate(length(
+        min = 5,
+        max = 64,
+        message = "title must be between 5 and 64 characters long"
+    ))]
     pub title: String,
+    #[validate(length(max = 1500, message = "content cannot be longer than 1500 characters"))]
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct AdvertWithUser {
     pub id: i32,
     pub user_id: i32,

@@ -15,11 +15,18 @@ pub struct User {
     #[serde(skip_deserializing)]
     #[serde(skip_serializing)]
     pub id: i32,
-    #[validate(length(min = 3, message = "username have to be at least 3 characters long"))]
+    #[validate(length(min = 3, max = 64, message = "username must be between 5 and 64 characters long"))]
     pub username: String,
     #[serde(skip_serializing)]
+    #[validate(custom(
+        function = "crate::validate::validate_password",
+        message = "Password should contain at least 1 digit, 1 special character, 1 uppercase character and be at least 8 characters long"
+    ))]
     pub password: String,
+
+    #[validate(length(min = 2, max = 64, message = "name must be between 5 and 64 characters"))]
     pub name: String,
+    #[validate(length(min = 2, max = 64, message = "surname must be between 5 and 64 characters"))]
     pub surname: String,
 }
 

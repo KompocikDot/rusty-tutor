@@ -7,3 +7,13 @@ services:
       - 5432:5432
     env_file:
       - .env
+  backend:
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
