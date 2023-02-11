@@ -2,6 +2,6 @@ FROM rust:alpine3.17
 
 COPY ./ ./
 
-RUN cargo build --release
-
-CMD ["cargo run --release"]
+RUN rustup toolchain install nightly
+RUN cargo +nightly install -Z sparse-registry --debug cargo-ament-build 
+RUN cargo run
