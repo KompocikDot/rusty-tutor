@@ -1,4 +1,4 @@
-use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
+use actix_web::{error::{ResponseError, PathError}, http::StatusCode, HttpResponse};
 use derive_more::Display;
 use serde::Serialize;
 use validator::ValidationErrors;
@@ -10,8 +10,9 @@ pub enum ApiError {
     CannotDecodeJwtToken(String),
     CannotEncodeJwtToken(String),
     InternalServerError(String),
+    JSONParseError(String),
     NotFound(String),
-    #[display(fmt = "")]
+    PathParseError(String),
     ValidationError(ValidationErrors),
     Unauthorized(String),
 }
@@ -31,12 +32,16 @@ pub struct ValidationErrorResponse {
 impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {
         match self {
-            ApiError::BadRequest(error) => {
+            ApiError::BadRequest(error) |
+            ApiError::PathParseError(error) |
+            ApiError::JSONParseError(error)
+            => {
                 let resp: ErrorResponse = error.into();
                 HttpResponse::BadRequest().json(resp)
             }
             ApiError::NotFound(message) => {
                 let resp: ErrorResponse = message.into();
+                println!("Test");
                 HttpResponse::NotFound().json(resp)
             }
             ApiError::ValidationError(errors) => {

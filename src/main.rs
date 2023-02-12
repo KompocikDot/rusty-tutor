@@ -11,11 +11,12 @@ mod validate;
 use actix_cors::Cors;
 use actix_web::{
     middleware::Logger,
-    web::{self},
-    App, HttpServer,
+    web::{self, PathConfig, JsonConfig},
+    App, HttpServer, error, HttpResponse,
 };
 
 use env_logger::Env;
+use errors::ApiError;
 use handlers::{
     adverts::adverts_scope, auth::auth_scope, opinions::opinions_scope, user::user_scope,
 };
@@ -52,6 +53,12 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(Logger::default())
             .app_data(web::Data::new(app_data.clone()))
+            .app_data(PathConfig::default().error_handler(|err, _| {
+                ApiError::PathParseError(err.to_string()).into()
+            }))
+            .app_data(JsonConfig::default().error_handler(|err, _| {
+                ApiError::JSONParseError(err.to_string()).into()
+            }))
             .service(auth_scope())
             .service(adverts_scope())
             .service(user_scope())

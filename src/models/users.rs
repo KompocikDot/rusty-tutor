@@ -15,7 +15,11 @@ pub struct User {
     #[serde(skip_deserializing)]
     #[serde(skip_serializing)]
     pub id: i32,
-    #[validate(length(min = 3, max = 64, message = "username must be between 5 and 64 characters long"))]
+    #[validate(length(
+        min = 3,
+        max = 64,
+        message = "username must be between 5 and 64 characters long"
+    ))]
     pub username: String,
     #[serde(skip_serializing)]
     #[validate(custom(
@@ -24,9 +28,17 @@ pub struct User {
     ))]
     pub password: String,
 
-    #[validate(length(min = 2, max = 64, message = "name must be between 5 and 64 characters"))]
+    #[validate(length(
+        min = 2,
+        max = 64,
+        message = "name must be between 5 and 64 characters"
+    ))]
     pub name: String,
-    #[validate(length(min = 2, max = 64, message = "surname must be between 5 and 64 characters"))]
+    #[validate(length(
+        min = 2,
+        max = 64,
+        message = "surname must be between 5 and 64 characters"
+    ))]
     pub surname: String,
 }
 

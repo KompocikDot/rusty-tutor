@@ -16,7 +16,7 @@ use crate::{
 pub fn opinions_scope() -> Scope {
     Scope::new("/opinions")
         .service(create_opinion)
-        .service(get_all_opinions)
+        .service(get_all_user_opinions)
 }
 
 #[post("/")]
@@ -40,8 +40,8 @@ async fn delete_opinion(
     respond_accepted()
 }
 
-#[get("/{id}")]
-async fn get_all_opinions(
+#[get("/user/{id}")]
+async fn get_all_user_opinions(
     state: web::Data<AppState>,
     path: web::Path<Item>,
 ) -> APIResponse<Json<Vec<Opinion>>> {
@@ -49,4 +49,5 @@ async fn get_all_opinions(
     respond_json(opinions)
 }
 
+// #[patch("/{id}")]
 // async fn update_opinion()

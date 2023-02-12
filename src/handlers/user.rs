@@ -3,6 +3,7 @@ use actix_web::web::Json;
 use actix_web::{delete, get, patch, web, HttpResponse, Scope};
 
 use crate::errors::ApiError;
+
 use crate::models::users::User;
 use crate::response::respond_json;
 use crate::types::APIResponse;
@@ -11,15 +12,9 @@ use crate::{extractors::jwt::JWTToken, AppState};
 
 pub fn user_scope() -> Scope {
     Scope::new("/user")
-        .service(user_opinions)
         .service(user_profile)
         .service(update_user_profile)
         .service(delete_user_profile)
-}
-
-#[get("/opinions/")]
-async fn user_opinions(_app_state: web::Data<AppState>) -> HttpResponse {
-    todo!();
 }
 
 #[get("/profile")]
